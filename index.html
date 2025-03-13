@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KiddyChat</title>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* General styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 20px 0;
+      color: #2d89ef;
+      font-size: 1.5em;
+    }
+
+    /* Chatroom container */
+    .chatroom-container {
+      width: 90%;
+      max-width: 400px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+      margin: 10px;
+    }
+
+    /* Group name display */
+    #groupNameDisplay {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #2d89ef;
+    }
+
+    /* Messages container */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+    }
+
+    /* Individual message styling */
+    .message {
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 5px;
+      background-color: #e1f5fe;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+
+    .message.sent {
+      background-color: #d1f7c4;
+      margin-left: auto;
+    }
+
+    .message img, .message a, .message audio {
+      max-width: 100%;
+      display: block;
+      margin-top: 5px;
+      border-radius: 5px;
+    }
+
+    /* Input area */
+    .input-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: white;
+      border-radius: 25px;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1em;
+      outline: none;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    #sendButton, #attachButton, #recordButton, #stopButton {
+      width: 40px;
+      height: 40px;
+      padding: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: #2d89ef;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #sendButton:hover, #attachButton:hover, #recordButton:hover, #stopButton:hover {
+      background-color: #1e5bbf;
+    }
+
+    #stopButton {
+      display: none; /* Hidden by default */
+    }
+
+    /* Student ID input */
+    #studentIdForm {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #studentIdInput {
+      width: 90%;
+      max-width: 300px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    #submitStudentId {
+      width: 90%;
+      max-width: 300px;
+      padding: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: #2d89ef;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #submitStudentId:hover {
+      background-color: #1e5bbf;
+    }
+  </style>
+</head>
+<body>
+  <h1>KiddyChat</h1>
+  <div id="studentIdForm">
+    <input type="text" id="studentIdInput" placeholder="Enter your Student ID">
+    <button id="submitStudentId">Submit</button>
+  </div>
+  <div class="chatroom-container hidden">
+    <div id="groupNameDisplay"></div>
+    <div id="messages"></div>
+    <div class="input-container">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <input type="file" id="fileInput">
+      <button id="attachButton" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-paperclip"></i> <!-- Attach icon -->
+      </button>
+      <button id="recordButton">
+        <i class="fas fa-microphone"></i> <!-- Record icon -->
+      </button>
+      <button id="stopButton">
+        <i class="fas fa-stop"></i> <!-- Stop icon -->
+      </button>
+      <button id="sendButton">
+        <i class="fas fa-paper-plane"></i> <!-- Send icon -->
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxORm1Up_vSQHnT5WVTqP9I7HKWKsBBm4",
+      authDomain: "school-mangement-8ca60.firebaseapp.com",
+      projectId: "school-mangement-8ca60",
+      storageBucket: "school-mangement-8ca60.appspot.com",
+      messagingSenderId: "313997383681",
+      appId: "1:313997383681:web:7b1e55f6c036120c5fc800",
+      measurementId: "G-P3JST7V88B"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // DOM elements
+    const studentIdForm = document.getElementById('studentIdForm');
+    const studentIdInput = document.getElementById('studentIdInput');
+    const submitStudentId = document.getElementById('submitStudentId');
+    const chatroomContainer = document.querySelector('.chatroom-container');
+    const groupNameDisplay = document.getElementById('groupNameDisplay');
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const fileInput = document.getElementById('fileInput');
+    const sendButton = document.getElementById('sendButton');
+    const recordButton = document.getElementById('recordButton');
+    const stopButton = document.getElementById('stopButton');
+
+    let selectedGroup = null;
+    let studentId = null;
+    let studentName = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+    // Handle student ID submission
+    submitStudentId.addEventListener('click', async () => {
+      studentId = studentIdInput.value.trim();
+      if (!studentId) {
+        alert('Please enter your Student ID.');
+        return;
+      }
+
+      // Fetch the student's group and name
+      try {
+        const studentDoc = await getDoc(doc(db, 'students', studentId));
+        if (!studentDoc.exists()) {
+          alert('Student not found.');
+          return;
+        }
+
+        const studentData = studentDoc.data();
+        if (!studentData.group) {
+          alert('You are not assigned to any group.');
+          return;
+        }
+
+        selectedGroup = studentData.group;
+        studentName = studentData.name; // Fetch the student's name
+
+        // Display the group name
+        groupNameDisplay.textContent = `Group: ${selectedGroup}`;
+
+        // Hide the student ID form and show the chatroom
+        studentIdForm.style.display = 'none';
+        chatroomContainer.classList.remove('hidden');
+
+        // Load messages for the group
+        loadMessages(selectedGroup);
+      } catch (error) {
+        console.error('Error fetching student data: ', error);
+        alert('Error fetching student data. Please try again.');
+      }
+    });
+
+    // Load messages for the selected group
+    function loadMessages(groupId) {
+      messagesDiv.innerHTML = ''; // Clear previous messages
+      const messagesRef = collection(db, 'groups', groupId, 'messages');
+      const q = query(messagesRef, orderBy('timestamp', 'asc'));
+
+      onSnapshot(q, async (snapshot) => {
+        messagesDiv.innerHTML = ''; // Clear messages before re-rendering
+        for (const doc of snapshot.docs) {
+          const message = doc.data();
+          const senderName = await getStudentName(message.sender); // Fetch sender's name
+          displayMessage(message, senderName);
+        }
+      });
+    }
+
+    // Fetch a student's name by ID
+    async function getStudentName(studentId) {
+      const studentDoc = await getDoc(doc(db, 'students', studentId));
+      if (studentDoc.exists()) {
+        return studentDoc.data().name;
+      }
+      return 'Unknown';
+    }
+
+    // Display a message in the chatroom
+    function displayMessage(message, senderName) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      if (message.sender === studentId) {
+        messageDiv.classList.add('sent');
+        messageDiv.textContent = `You: ${message.text}`;
+      } else {
+        messageDiv.textContent = `${senderName}: ${message.text}`;
+      }
+
+      // Display file attachment (if any)
+      if (message.fileUrl) {
+        if (message.fileUrl.endsWith('.jpg') || message.fileUrl.endsWith('.png') || message.fileUrl.endsWith('.jpeg')) {
+          const img = document.createElement('img');
+          img.src = message.fileUrl;
+          messageDiv.appendChild(img);
+        } else if (message.fileUrl.endsWith('.wav') || message.fileUrl.endsWith('.mp3')) {
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.src = message.fileUrl;
+          messageDiv.appendChild(audio);
+        } else {
+          const link = document.createElement('a');
+          link.href = message.fileUrl;
+          link.textContent = 'Download File';
+          link.target = '_blank';
+          messageDiv.appendChild(link);
+        }
+      }
+
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to the latest message
+    }
+
+    // Start recording audio
+    recordButton.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+
+          // Upload audio file to Firebase Storage
+          const storageRef = ref(storage, `audio/${Date.now()}.wav`);
+          await uploadBytes(storageRef, audioFile);
+          const fileUrl = await getDownloadURL(storageRef);
+
+          // Send the audio message
+          const message = {
+            text: '', // Optional text message
+            sender: studentId,
+            timestamp: new Date(),
+            fileUrl: fileUrl
+          };
+          await addDoc(collection(db, 'groups', selectedGroup, 'messages'), message);
+
+          // Reset recording state
+          audioChunks = [];
+          recordButton.style.display = 'inline';
+          stopButton.style.display = 'none';
+        };
+
+        mediaRecorder.start();
+        recordButton.style.display = 'none';
+        stopButton.style.display = 'inline';
+      } catch (error) {
+        console.error('Error accessing microphone: ', error);
+        alert('Error accessing microphone. Please allow microphone access.');
+      }
+    });
+
+    // Stop recording audio
+    stopButton.addEventListener('click', () => {
+      if (mediaRecorder) {
+        mediaRecorder.stop();
+      }
+    });
+
+    // Send a message
+    sendButton.addEventListener('click', async () => {
+      const messageText = messageInput.value.trim();
+      const file = fileInput.files[0];
+
+      if (!messageText && !file) {
+        alert('Please enter a message or attach a file.');
+        return;
+      }
+
+      let fileUrl = null;
+      if (file) {
+        // Upload file to Firebase Storage
+        const storageRef = ref(storage, `files/${file.name}`);
+        await uploadBytes(storageRef, file);
+        fileUrl = await getDownloadURL(storageRef);
+      }
+
+      const message = {
+        text: messageText,
+        sender: studentId, // Use the student ID as the sender
+        timestamp: new Date(),
+        fileUrl: fileUrl // Include the file URL in the message
+      };
+
+      // Add message to Firestore
+      await addDoc(collection(db, 'groups', selectedGroup, 'messages'), message);
+
+      // Clear input fields
+      messageInput.value = '';
+      fileInput.value = '';
+    });
+  </script>
+</body>
+</html>
