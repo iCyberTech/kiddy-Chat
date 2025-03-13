@@ -16,14 +16,132 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       overflow: hidden;
     }
 
-    h1 {
-      margin: 20px 0;
-      color: #2d89ef;
-      font-size: 1.5em;
+    /* Loader container */
+    .loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #2d89ef;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeOut 1s ease-in-out 5s forwards;
+    }
+
+    /* Thunder strike animation */
+    .thunder {
+      font-size: 4em;
+      color: white;
+      animation: thunderStrike 3s ease-in-out;
+    }
+
+    @keyframes thunderStrike {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* KiddyChat text animation */
+    .loader-text {
+      font-size: 2em;
+      font-weight: bold;
+      color: white;
+      margin-top: 20px;
+      animation: textFadeIn 2s ease-in-out;
+    }
+
+    @keyframes textFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Fade out animation */
+    @keyframes fadeOut {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    /* Student ID modal */
+    #studentIdModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      display: none; /* Hidden initially */
+    }
+
+    #studentIdForm {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 300px;
+    }
+
+    #studentIdInput {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    #submitStudentId {
+      width: 100%;
+      padding: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: #2d89ef;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #submitStudentId:hover {
+      background-color: #1e5bbf;
+    }
+
+    /* Main content */
+    .content {
+      display: none; /* Hidden initially */
     }
 
     /* Chatroom container */
@@ -129,66 +247,46 @@
     #stopButton {
       display: none; /* Hidden by default */
     }
-
-    /* Student ID input */
-    #studentIdForm {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    #studentIdInput {
-      width: 90%;
-      max-width: 300px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-
-    #submitStudentId {
-      width: 90%;
-      max-width: 300px;
-      padding: 10px;
-      font-size: 1em;
-      cursor: pointer;
-      background-color: #2d89ef;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    #submitStudentId:hover {
-      background-color: #1e5bbf;
-    }
   </style>
 </head>
 <body>
-  <h1>KiddyChat</h1>
-  <div id="studentIdForm">
-    <input type="text" id="studentIdInput" placeholder="Enter your Student ID">
-    <button id="submitStudentId">Submit</button>
+  <!-- Loader -->
+  <div class="loader">
+    <div class="thunder">⚡</div>
+    <div class="loader-text">KiddyChat</div>
   </div>
-  <div class="chatroom-container hidden">
-    <div id="groupNameDisplay"></div>
-    <div id="messages"></div>
-    <div class="input-container">
-      <input type="text" id="messageInput" placeholder="Type your message...">
-      <input type="file" id="fileInput">
-      <button id="attachButton" onclick="document.getElementById('fileInput').click()">
-        <i class="fas fa-paperclip"></i> <!-- Attach icon -->
-      </button>
-      <button id="recordButton">
-        <i class="fas fa-microphone"></i> <!-- Record icon -->
-      </button>
-      <button id="stopButton">
-        <i class="fas fa-stop"></i> <!-- Stop icon -->
-      </button>
-      <button id="sendButton">
-        <i class="fas fa-paper-plane"></i> <!-- Send icon -->
-      </button>
+
+  <!-- Student ID Modal -->
+  <div id="studentIdModal">
+    <div id="studentIdForm">
+      <h2>Enter Student ID</h2>
+      <input type="text" id="studentIdInput" placeholder="Enter your Student ID">
+      <button id="submitStudentId">Submit</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="content">
+    <h1>KiddyChat</h1>
+    <div class="chatroom-container hidden">
+      <div id="groupNameDisplay"></div>
+      <div id="messages"></div>
+      <div class="input-container">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <input type="file" id="fileInput">
+        <button id="attachButton" onclick="document.getElementById('fileInput').click()">
+          <i class="fas fa-paperclip"></i> <!-- Attach icon -->
+        </button>
+        <button id="recordButton">
+          <i class="fas fa-microphone"></i> <!-- Record icon -->
+        </button>
+        <button id="stopButton">
+          <i class="fas fa-stop"></i> <!-- Stop icon -->
+        </button>
+        <button id="sendButton">
+          <i class="fas fa-paper-plane"></i> <!-- Send icon -->
+        </button>
+      </div>
     </div>
   </div>
 
@@ -215,7 +313,7 @@
     const storage = getStorage(app);
 
     // DOM elements
-    const studentIdForm = document.getElementById('studentIdForm');
+    const studentIdModal = document.getElementById('studentIdModal');
     const studentIdInput = document.getElementById('studentIdInput');
     const submitStudentId = document.getElementById('submitStudentId');
     const chatroomContainer = document.querySelector('.chatroom-container');
@@ -233,7 +331,13 @@
     let mediaRecorder = null;
     let audioChunks = [];
 
-    // Handle student ID submission
+    // Show main content after loader
+    setTimeout(() => {
+      document.querySelector('.loader').style.display = 'none';
+      studentIdModal.style.display = 'flex'; // Show the Student ID modal
+    }, 5000); // 5 seconds
+
+    // Handle Student ID submission
     submitStudentId.addEventListener('click', async () => {
       studentId = studentIdInput.value.trim();
       if (!studentId) {
@@ -241,7 +345,15 @@
         return;
       }
 
-      // Fetch the student's group and name
+      // Hide the modal
+      studentIdModal.style.display = 'none';
+
+      // Fetch the student's group and load the chatroom
+      await loadStudentGroup(studentId);
+    });
+
+    // Fetch the student's group and load the chatroom
+    async function loadStudentGroup(studentId) {
       try {
         const studentDoc = await getDoc(doc(db, 'students', studentId));
         if (!studentDoc.exists()) {
@@ -259,11 +371,11 @@
         studentName = studentData.name; // Fetch the student's name
 
         // Display the group name
-        groupNameDisplay.textContent = `${selectedGroup}`;
+        groupNameDisplay.textContent = `Group: ${selectedGroup}`;
 
-        // Hide the student ID form and show the chatroom
-        studentIdForm.style.display = 'none';
+        // Show the chatroom
         chatroomContainer.classList.remove('hidden');
+        document.querySelector('.content').style.display = 'block';
 
         // Load messages for the group
         loadMessages(selectedGroup);
@@ -271,7 +383,7 @@
         console.error('Error fetching student data: ', error);
         alert('Error fetching student data. Please try again.');
       }
-    });
+    }
 
     // Load messages for the selected group
     function loadMessages(groupId) {
