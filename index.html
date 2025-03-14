@@ -200,6 +200,27 @@
       border-radius: 5px;
     }
 
+    /* Message actions (edit and delete icons) */
+    .message-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .edit-icon, .delete-icon {
+      cursor: pointer;
+      font-size: 0.8em;
+      color: #666;
+    }
+
+    .edit-icon:hover {
+      color: #2d89ef;
+    }
+
+    .delete-icon:hover {
+      color: #ff4d4d;
+    }
+
     /* Input area */
     .input-container {
       display: flex;
@@ -293,7 +314,7 @@
   <script type="module">
     // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 
     // Your Firebase configuration
@@ -394,7 +415,7 @@
       onSnapshot(q, async (snapshot) => {
         messagesDiv.innerHTML = ''; // Clear messages before re-rendering
         for (const doc of snapshot.docs) {
-          const message = doc.data();
+          const message = { id: doc.id, ...doc.data() };
           const senderName = await getStudentName(message.sender); // Fetch sender's name
           displayMessage(message, senderName);
         }
@@ -416,33 +437,91 @@
       messageDiv.classList.add('message');
       if (message.sender === studentId) {
         messageDiv.classList.add('sent');
-        messageDiv.textContent = `You: ${message.text}`;
-      } else {
-        messageDiv.textContent = `${senderName}: ${message.text}`;
       }
+
+      const messageContent = document.createElement('div');
+      messageContent.classList.add('message-content');
+
+      const messageText = document.createElement('span');
+      messageText.classList.add('message-text');
+      messageText.textContent = `${senderName}: ${message.text}`;
+
+      // Add edit and delete icons for the sender's messages
+      if (message.sender === studentId) {
+        const messageActions = document.createElement('div');
+        messageActions.classList.add('message-actions');
+
+        const editIcon = document.createElement('i');
+        editIcon.classList.add('fas', 'fa-edit', 'edit-icon');
+        editIcon.dataset.id = message.id; // Store message ID for editing
+        editIcon.addEventListener('click', () => editMessage(message.id, message.text));
+
+        const deleteIcon = document.createElement('i');
+        deleteIcon.classList.add('fas', 'fa-trash', 'delete-icon');
+        deleteIcon.dataset.id = message.id; // Store message ID for deletion
+        deleteIcon.addEventListener('click', () => deleteMessage(message.id));
+
+        messageActions.appendChild(editIcon);
+        messageActions.appendChild(deleteIcon);
+        messageContent.appendChild(messageActions);
+      }
+
+      messageContent.appendChild(messageText);
+      messageDiv.appendChild(messageContent);
 
       // Display file attachment (if any)
       if (message.fileUrl) {
+        const fileAttachment = document.createElement('div');
+        fileAttachment.classList.add('file-attachment');
         if (message.fileUrl.endsWith('.jpg') || message.fileUrl.endsWith('.png') || message.fileUrl.endsWith('.jpeg')) {
           const img = document.createElement('img');
           img.src = message.fileUrl;
-          messageDiv.appendChild(img);
+          fileAttachment.appendChild(img);
         } else if (message.fileUrl.endsWith('.wav') || message.fileUrl.endsWith('.mp3')) {
           const audio = document.createElement('audio');
           audio.controls = true;
           audio.src = message.fileUrl;
-          messageDiv.appendChild(audio);
+          fileAttachment.appendChild(audio);
         } else {
           const link = document.createElement('a');
           link.href = message.fileUrl;
           link.textContent = 'Download File';
           link.target = '_blank';
-          messageDiv.appendChild(link);
+          fileAttachment.appendChild(link);
         }
+        messageDiv.appendChild(fileAttachment);
       }
 
       messagesDiv.appendChild(messageDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to the latest message
+    }
+
+    // Edit a message
+    async function editMessage(messageId, currentText) {
+      const newText = prompt('Edit your message:', currentText);
+      if (newText !== null && newText.trim() !== '') {
+        try {
+          const messageRef = doc(db, 'groups', selectedGroup, 'messages', messageId);
+          await updateDoc(messageRef, { text: newText.trim() });
+        } catch (error) {
+          console.error('Error updating message: ', error);
+          alert('Error updating message. Please try again.');
+        }
+      }
+    }
+
+    // Delete a message
+    async function deleteMessage(messageId) {
+      const confirmDelete = confirm('Are you sure you want to delete this message?');
+      if (confirmDelete) {
+        try {
+          const messageRef = doc(db, 'groups', selectedGroup, 'messages', messageId);
+          await deleteDoc(messageRef);
+        } catch (error) {
+          console.error('Error deleting message: ', error);
+          alert('Error deleting message. Please try again.');
+        }
+      }
     }
 
     // Start recording audio
