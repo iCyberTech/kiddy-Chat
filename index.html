@@ -224,6 +224,13 @@
       text-align: right;
     }
 
+    /* Sender's name styling */
+    .sender-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
     /* Message actions (edit and delete icons) */
     .message-actions {
       display: flex;
@@ -467,7 +474,12 @@
       const bubble = document.createElement('div');
       bubble.classList.add('bubble');
 
-      // Message text
+      // Sender's name and message text
+      const senderNameElement = document.createElement('div');
+      senderNameElement.classList.add('sender-name');
+      senderNameElement.textContent = message.sender === studentId ? 'You' : senderName; // Display "You" for sent messages
+      bubble.appendChild(senderNameElement);
+
       const messageText = document.createElement('div');
       messageText.textContent = message.text;
       bubble.appendChild(messageText);
