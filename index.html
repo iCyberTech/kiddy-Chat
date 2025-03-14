@@ -9,10 +9,10 @@
   <style>
     /* General styles */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f4f9;
+      background-color: #f0f2f5;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -28,20 +28,20 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: #2d89ef;
+      background-color: #0088cc;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      animation: fadeOut 1s ease-in-out 5s forwards;
+      animation: fadeOut 1s ease-in-out 3s forwards;
     }
 
     /* Thunder strike animation */
     .thunder {
       font-size: 4em;
       color: white;
-      animation: thunderStrike 3s ease-in-out;
+      animation: thunderStrike 1.5s ease-in-out;
     }
 
     @keyframes thunderStrike {
@@ -59,7 +59,7 @@
       }
     }
 
-    /* KiddyChat text animation */
+    /* Loader text */
     .loader-text {
       font-size: 2em;
       font-weight: bold;
@@ -129,89 +129,99 @@
       padding: 10px;
       font-size: 1em;
       cursor: pointer;
-      background-color: #2d89ef;
+      background-color: #0088cc;
       color: white;
       border: none;
       border-radius: 5px;
     }
 
     #submitStudentId:hover {
-      background-color: #1e5bbf;
-    }
-
-    /* Main content */
-    .content {
-      display: none; /* Hidden initially */
+      background-color: #0077b3;
     }
 
     /* Chatroom container */
     .chatroom-container {
       width: 90%;
-      max-width: 400px;
+      max-width: 500px;
       background-color: white;
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 15px;
       display: flex;
       flex-direction: column;
-      height: 80vh;
+      height: 90vh;
       margin: 10px;
+      overflow: hidden;
+      display: none; /* Hidden initially */
     }
 
     /* Group name display */
     #groupNameDisplay {
       font-size: 1.2em;
       font-weight: bold;
-      margin-bottom: 10px;
+      padding: 15px;
+      background-color: #0088cc;
+      color: white;
       text-align: center;
-      color: #2d89ef;
     }
 
     /* Messages container */
     #messages {
       flex: 1;
       overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 5px;
       padding: 10px;
-      margin-bottom: 10px;
-      background-color: #f9f9f9;
+      background-color: #e5ddd5;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    /* Individual message styling */
+    /* Message bubbles */
     .message {
-      margin-bottom: 10px;
-      padding: 8px;
-      border-radius: 5px;
-      background-color: #e1f5fe;
-      max-width: 70%;
-      word-wrap: break-word;
       display: flex;
-      align-items: flex-start;
+      align-items: flex-end;
+      max-width: 70%;
+      gap: 8px;
+    }
+
+    .message.received {
+      align-self: flex-start;
     }
 
     .message.sent {
-      background-color: #d1f7c4;
-      margin-left: auto;
+      align-self: flex-end;
+      flex-direction: row-reverse;
     }
 
-    /* Avatar styling */
-    .avatar {
+    .message .avatar {
       width: 30px;
       height: 30px;
       border-radius: 50%;
-      margin-right: 10px;
+      background-color: #ccc;
+      flex-shrink: 0;
     }
 
-    .message-content {
-      flex: 1;
+    .message .bubble {
+      padding: 10px 15px;
+      border-radius: 15px;
+      position: relative;
+      word-wrap: break-word;
     }
 
-    .message img, .message a, .message audio {
-      max-width: 100%;
-      display: block;
+    .message.received .bubble {
+      background-color: white;
+      border-bottom-left-radius: 5px;
+    }
+
+    .message.sent .bubble {
+      background-color: #dcf8c6;
+      border-bottom-right-radius: 5px;
+    }
+
+    .message .timestamp {
+      font-size: 0.75em;
+      color: #666;
       margin-top: 5px;
-      border-radius: 5px;
+      text-align: right;
     }
 
     /* Message actions (edit and delete icons) */
@@ -228,7 +238,7 @@
     }
 
     .edit-icon:hover {
-      color: #2d89ef;
+      color: #0088cc;
     }
 
     .delete-icon:hover {
@@ -241,46 +251,41 @@
       align-items: center;
       gap: 10px;
       background-color: white;
-      border-radius: 25px;
       padding: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-top: 1px solid #ddd;
     }
 
     #messageInput {
       flex: 1;
       padding: 10px;
       border: none;
-      border-radius: 25px;
+      border-radius: 20px;
       font-size: 1em;
       outline: none;
+      background-color: #f0f2f5;
     }
 
     #fileInput {
       display: none;
     }
 
-    #sendButton, #attachButton, #recordButton, #stopButton {
+    #attachButton, #sendButton {
       width: 40px;
       height: 40px;
       padding: 10px;
       font-size: 1em;
       cursor: pointer;
-      background-color: #2d89ef;
+      background-color: #0088cc;
       color: white;
       border: none;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    #sendButton:hover, #attachButton:hover, #recordButton:hover, #stopButton:hover {
-      background-color: #1e5bbf;
-    }
-
-    #stopButton {
-      display: none; /* Hidden by default */
+    #attachButton:hover, #sendButton:hover {
+      background-color: #0077b3;
     }
   </style>
 </head>
@@ -302,21 +307,14 @@
 
   <!-- Main content -->
   <div class="content">
-    <h1>KiddyChat</h1>
-    <div class="chatroom-container hidden">
+    <div class="chatroom-container">
       <div id="groupNameDisplay"></div>
       <div id="messages"></div>
       <div class="input-container">
-        <input type="text" id="messageInput" placeholder="Type your message...">
+        <input type="text" id="messageInput" placeholder="Type a message...">
         <input type="file" id="fileInput">
         <button id="attachButton" onclick="document.getElementById('fileInput').click()">
           <i class="fas fa-paperclip"></i> <!-- Attach icon -->
-        </button>
-        <button id="recordButton">
-          <i class="fas fa-microphone"></i> <!-- Record icon -->
-        </button>
-        <button id="stopButton">
-          <i class="fas fa-stop"></i> <!-- Stop icon -->
         </button>
         <button id="sendButton">
           <i class="fas fa-paper-plane"></i> <!-- Send icon -->
@@ -357,20 +355,16 @@
     const messageInput = document.getElementById('messageInput');
     const fileInput = document.getElementById('fileInput');
     const sendButton = document.getElementById('sendButton');
-    const recordButton = document.getElementById('recordButton');
-    const stopButton = document.getElementById('stopButton');
 
     let selectedGroup = null;
     let studentId = null;
     let studentName = null;
-    let mediaRecorder = null;
-    let audioChunks = [];
 
     // Show main content after loader
     setTimeout(() => {
       document.querySelector('.loader').style.display = 'none';
       studentIdModal.style.display = 'flex'; // Show the Student ID modal
-    }, 5000); // 5 seconds
+    }, 3000); // 3 seconds
 
     // Handle Student ID submission
     submitStudentId.addEventListener('click', async () => {
@@ -409,7 +403,7 @@
         groupNameDisplay.textContent = `Group: ${selectedGroup}`;
 
         // Show the chatroom
-        chatroomContainer.classList.remove('hidden');
+        chatroomContainer.style.display = 'flex';
         document.querySelector('.content').style.display = 'block';
 
         // Load messages for the group
@@ -453,24 +447,36 @@
       messageDiv.classList.add('message');
       if (message.sender === studentId) {
         messageDiv.classList.add('sent');
+      } else {
+        messageDiv.classList.add('received');
       }
 
       // Fetch sender's name and avatar
       const { name: senderName, avatarUrl } = await getStudentInfo(message.sender);
 
-      // Add avatar
-      const avatarImg = document.createElement('img');
-      avatarImg.classList.add('avatar');
-      avatarImg.src = avatarUrl;
-      avatarImg.alt = `${senderName}'s Avatar`;
-      messageDiv.appendChild(avatarImg);
+      // Add avatar for received messages
+      if (message.sender !== studentId) {
+        const avatarImg = document.createElement('img');
+        avatarImg.classList.add('avatar');
+        avatarImg.src = avatarUrl;
+        avatarImg.alt = `${senderName}'s Avatar`;
+        messageDiv.appendChild(avatarImg);
+      }
 
-      const messageContent = document.createElement('div');
-      messageContent.classList.add('message-content');
+      // Message bubble
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
 
-      const messageText = document.createElement('span');
-      messageText.classList.add('message-text');
-      messageText.textContent = `${senderName}: ${message.text}`;
+      // Message text
+      const messageText = document.createElement('div');
+      messageText.textContent = message.text;
+      bubble.appendChild(messageText);
+
+      // Timestamp
+      const timestamp = document.createElement('div');
+      timestamp.classList.add('timestamp');
+      timestamp.textContent = new Date(message.timestamp?.toDate()).toLocaleTimeString();
+      bubble.appendChild(timestamp);
 
       // Add edit and delete icons for the sender's messages
       if (message.sender === studentId) {
@@ -489,37 +495,14 @@
 
         messageActions.appendChild(editIcon);
         messageActions.appendChild(deleteIcon);
-        messageContent.appendChild(messageActions);
+        bubble.appendChild(messageActions);
       }
 
-      messageContent.appendChild(messageText);
-      messageDiv.appendChild(messageContent);
-
-      // Display file attachment (if any)
-      if (message.fileUrl) {
-        const fileAttachment = document.createElement('div');
-        fileAttachment.classList.add('file-attachment');
-        if (message.fileUrl.endsWith('.jpg') || message.fileUrl.endsWith('.png') || message.fileUrl.endsWith('.jpeg')) {
-          const img = document.createElement('img');
-          img.src = message.fileUrl;
-          fileAttachment.appendChild(img);
-        } else if (message.fileUrl.endsWith('.wav') || message.fileUrl.endsWith('.mp3')) {
-          const audio = document.createElement('audio');
-          audio.controls = true;
-          audio.src = message.fileUrl;
-          fileAttachment.appendChild(audio);
-        } else {
-          const link = document.createElement('a');
-          link.href = message.fileUrl;
-          link.textContent = 'Download File';
-          link.target = '_blank';
-          fileAttachment.appendChild(link);
-        }
-        messageDiv.appendChild(fileAttachment);
-      }
-
+      messageDiv.appendChild(bubble);
       messagesDiv.appendChild(messageDiv);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to the latest message
+
+      // Auto-scroll to the latest message
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
     // Edit a message
@@ -549,55 +532,6 @@
         }
       }
     }
-
-    // Start recording audio
-    recordButton.addEventListener('click', async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = (event) => {
-          audioChunks.push(event.data);
-        };
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
-
-          // Upload audio file to Firebase Storage
-          const storageRef = ref(storage, `audio/${Date.now()}.wav`);
-          await uploadBytes(storageRef, audioFile);
-          const fileUrl = await getDownloadURL(storageRef);
-
-          // Send the audio message
-          const message = {
-            text: '', // Optional text message
-            sender: studentId,
-            timestamp: new Date(),
-            fileUrl: fileUrl
-          };
-          await addDoc(collection(db, 'groups', selectedGroup, 'messages'), message);
-
-          // Reset recording state
-          audioChunks = [];
-          recordButton.style.display = 'inline';
-          stopButton.style.display = 'none';
-        };
-
-        mediaRecorder.start();
-        recordButton.style.display = 'none';
-        stopButton.style.display = 'inline';
-      } catch (error) {
-        console.error('Error accessing microphone: ', error);
-        alert('Error accessing microphone. Please allow microphone access.');
-      }
-    });
-
-    // Stop recording audio
-    stopButton.addEventListener('click', () => {
-      if (mediaRecorder) {
-        mediaRecorder.stop();
-      }
-    });
 
     // Send a message
     sendButton.addEventListener('click', async () => {
