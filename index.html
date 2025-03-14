@@ -186,11 +186,25 @@
       background-color: #e1f5fe;
       max-width: 70%;
       word-wrap: break-word;
+      display: flex;
+      align-items: flex-start;
     }
 
     .message.sent {
       background-color: #d1f7c4;
       margin-left: auto;
+    }
+
+    /* Avatar styling */
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .message-content {
+      flex: 1;
     }
 
     .message img, .message a, .message audio {
@@ -416,28 +430,40 @@
         messagesDiv.innerHTML = ''; // Clear messages before re-rendering
         for (const doc of snapshot.docs) {
           const message = { id: doc.id, ...doc.data() };
-          const senderName = await getStudentName(message.sender); // Fetch sender's name
-          displayMessage(message, senderName);
+          await displayMessage(message);
         }
       });
     }
 
-    // Fetch a student's name by ID
-    async function getStudentName(studentId) {
+    // Fetch a student's name and avatar by ID
+    async function getStudentInfo(studentId) {
       const studentDoc = await getDoc(doc(db, 'students', studentId));
       if (studentDoc.exists()) {
-        return studentDoc.data().name;
+        return {
+          name: studentDoc.data().name,
+          avatarUrl: studentDoc.data().avatarUrl || 'https://via.placeholder.com/30' // Default avatar if none is set
+        };
       }
-      return 'Unknown';
+      return { name: 'Unknown', avatarUrl: 'https://via.placeholder.com/30' };
     }
 
     // Display a message in the chatroom
-    function displayMessage(message, senderName) {
+    async function displayMessage(message) {
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
       if (message.sender === studentId) {
         messageDiv.classList.add('sent');
       }
+
+      // Fetch sender's name and avatar
+      const { name: senderName, avatarUrl } = await getStudentInfo(message.sender);
+
+      // Add avatar
+      const avatarImg = document.createElement('img');
+      avatarImg.classList.add('avatar');
+      avatarImg.src = avatarUrl;
+      avatarImg.alt = `${senderName}'s Avatar`;
+      messageDiv.appendChild(avatarImg);
 
       const messageContent = document.createElement('div');
       messageContent.classList.add('message-content');
